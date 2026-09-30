@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+venv/
+.vscode/
+pocketsmart.db
+static/uploads/*
+!static/uploads/.gitkeep
