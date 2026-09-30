@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Register - PocketSmart AI</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+    <div class="navbar"><h1>PocketSmart AI</h1><a href="/login">Sign In</a></div>
+    <div class="container" style="max-width: 420px;">
+        <div class="card">
+            <h2 style="text-align: center;">Create Account</h2>
+            <form action="/register" method="post">
+                <label>Username</label><input type="text" name="username" required>
+                <label>Password</label><input type="password" name="password" required>
+                <button type="submit" class="btn-secondary" style="width: 100%;">Create Account</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">Already registered? <a href="/login" style="color: #2563eb;">Sign In</a></p>
+        </div>
+    </div>
+</body>
+</html>

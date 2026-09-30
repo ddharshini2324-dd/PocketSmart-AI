@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head><title>Party Planner - PocketSmart AI</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+    <div class="navbar">
+        <h1>PocketSmart AI</h1>
+        <div><a href="/dashboard">Dashboard</a><a href="/history">History</a><a href="#" onclick="logout()">Logout</a></div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>Party Budget Planner</h2>
+            <form id="pForm">
+                <label>Total Budget (₹):</label><input type="number" id="tb" value="15000" required>
+                <label>Party Type:</label>
+                <select id="pt">
+                    <option value="Birthday Party">Birthday Party</option>
+                    <option value="Wedding / Reception">Wedding / Reception</option>
+                    <option value="Get Together">Get Together</option>
+                </select>
+                <label>Number of Guests:</label><input type="number" id="ng" value="25">
+                <label>Venue Type:</label><input type="text" id="vt" value="Home / Party Hall">
+                <button type="button" class="btn-secondary" onclick="runPartyPlanner()">Generate Party Plan</button>
+            </form>
+        </div>
+        <div id="result" class="card" style="display:none;">
+            <h2>Party Recommendation Breakdown</h2>
+            <div id="out"></div>
+        </div>
+    </div>
+    <script>
+        async function runPartyPlanner() {
+            const btn = document.querySelector("button");
+            btn.innerText = "Processing Party AI..."; btn.disabled = true;
+            const fd = new FormData();
+            fd.append("total_budget", document.getElementById("tb").value);
+            fd.append("party_type", document.getElementById("pt").value);
+            fd.append("num_guests", document.getElementById("ng").value);
+            fd.append("venue_type", document.getElementById("vt").value);
+            fd.append("username", localStorage.getItem("user") || "Guest");
+            try {
+                const res = await fetch("/api/party-planner", { method: "POST", body: fd });
+                const data = await res.json();
+                renderOutput(data);
+            } catch(e) { alert("Error generating party plan!"); }
+            finally { btn.innerText = "Generate Party Plan"; btn.disabled = false; }
+        }
+        function renderOutput(data) {
+            let html = "";
+            (data.budget_breakdown || []).forEach(cat => {
+                html += `<div class="item-box"><h3 style="color:#065f46;">${cat.category} - ₹${cat.allocation || ''}</h3>`;
+                (cat.items || []).forEach(item => {
+                    html += `<div style="margin-top:10px;"><strong>${item.name}</strong> (Est: ₹${item.estimated_price})<p style="font-size:13px; color:#64748b;">${item.description}</p>`;
+                    if(item.shopping_links) {
+                        for(let [store, link] of Object.entries(item.shopping_links)) {
+                            html += `<a href="${link}" target="_blank" class="shop-btn ${store.toLowerCase()}">${store}</a>`;
+                        }
+                    }
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            });
+            document.getElementById("out").innerHTML = html;
+            document.getElementById("result").style.display = "block";
+        }
+        function logout() { localStorage.removeItem("user"); window.location.href = "/login"; }
+    </script>
+</body>
+</html>

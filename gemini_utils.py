@@ -12,7 +12,6 @@ API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 if API_KEY:
     genai.configure(api_key=API_KEY)
 
-# Gemini 1.5 Flash Model
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 def extract_json_from_response(text: str) -> dict:
@@ -80,7 +79,6 @@ def get_home_recommendations(data: dict) -> dict:
         if not res or "budget_breakdown" not in res:
             raise ValueError("Invalid JSON returned")
     except Exception:
-        # Fallback response for edge cases
         res = {
             "total_budget": total_budget,
             "budget_breakdown": [

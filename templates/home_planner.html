@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head><title>Home Planner - PocketSmart AI</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+    <div class="navbar">
+        <h1>PocketSmart AI</h1>
+        <div><a href="/dashboard">Dashboard</a><a href="/history">History</a><a href="#" onclick="logout()">Logout</a></div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>Home Interior Budget Planner</h2>
+            <form id="hForm">
+                <label>Total Budget (₹):</label><input type="number" id="tb" value="50000" required>
+                <label>Number of Lights/Fixtures:</label><input type="number" id="nl" value="2">
+                <label>Number of Ceiling Fans:</label><input type="number" id="nf" value="1">
+                <label>Number of Furniture Pieces:</label><input type="number" id="nfurn" value="1">
+                <button type="button" onclick="runPlanner()">Generate Recommendations</button>
+            </form>
+        </div>
+        <div id="result" class="card" style="display:none;">
+            <h2>Recommendations Breakdown</h2>
+            <div id="out"></div>
+        </div>
+    </div>
+    <script>
+        async function runPlanner() {
+            const btn = document.querySelector("button");
+            btn.innerText = "Processing AI Recommendations..."; btn.disabled = true;
+            const fd = new FormData();
+            fd.append("total_budget", document.getElementById("tb").value);
+            fd.append("num_lights", document.getElementById("nl").value);
+            fd.append("num_fans", document.getElementById("nf").value);
+            fd.append("num_furniture", document.getElementById("nfurn").value);
+            fd.append("username", localStorage.getItem("user") || "Guest");
+            try {
+                const res = await fetch("/api/home-planner", { method: "POST", body: fd });
+                const data = await res.json();
+                renderOutput(data);
+            } catch(e) { alert("Error generating recommendations!"); }
+            finally { btn.innerText = "Generate Recommendations"; btn.disabled = false; }
+        }
+        function renderOutput(data) {
+            let html = "";
+            (data.budget_breakdown || []).forEach(cat => {
+                html += `<div class="item-box"><h3 style="color:#1e3a8a;">${cat.category} - ₹${cat.allocation || ''}</h3>`;
+                (cat.items || []).forEach(item => {
+                    html += `<div style="margin-top:10px;"><strong>${item.name}</strong> (Est: ₹${item.estimated_price})<p style="font-size:13px; color:#64748b;">${item.description}</p>`;
+                    if(item.shopping_links) {
+                        for(let [store, link] of Object.entries(item.shopping_links)) {
+                            html += `<a href="${link}" target="_blank" class="shop-btn ${store.toLowerCase()}">${store}</a>`;
+                        }
+                    }
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            });
+            document.getElementById("out").innerHTML = html;
+            document.getElementById("result").style.display = "block";
+        }
+        function logout() { localStorage.removeItem("user"); window.location.href = "/login"; }
+    </script>
+</body>
+</html>

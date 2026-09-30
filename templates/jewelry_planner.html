@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head><title>Jewelry Planner - PocketSmart AI</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+    <div class="navbar">
+        <h1>PocketSmart AI</h1>
+        <div><a href="/dashboard">Dashboard</a><a href="/history">History</a><a href="#" onclick="logout()">Logout</a></div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>Jewelry Budget Planner</h2>
+            <form id="jForm">
+                <label>Total Budget (₹):</label><input type="number" id="tb" value="20000" required>
+                <label>Occasion:</label><input type="text" id="occ" value="Wedding / Festive">
+                <label>Style Preferences:</label><input type="text" id="pref" value="Traditional Gold Finish">
+                <label>Upload Outfit Image (Optional Multimodal Input):</label><input type="file" id="imgFile" accept="image/*">
+                <button type="button" class="btn-purple" onclick="runJewelryPlanner()">Get Jewelry Recommendations</button>
+            </form>
+        </div>
+        <div id="result" class="card" style="display:none;">
+            <h2>Jewelry Recommendation Breakdown</h2>
+            <div id="out"></div>
+        </div>
+    </div>
+    <script>
+        async function runJewelryPlanner() {
+            const btn = document.querySelector("button");
+            btn.innerText = "Analyzing Style & Budget..."; btn.disabled = true;
+            const fd = new FormData();
+            fd.append("total_budget", document.getElementById("tb").value);
+            fd.append("occasion", document.getElementById("occ").value);
+            fd.append("preferences", document.getElementById("pref").value);
+            fd.append("username", localStorage.getItem("user") || "Guest");
+            const fileInput = document.getElementById("imgFile");
+            if (fileInput.files.length > 0) fd.append("image", fileInput.files[0]);
+            try {
+                const res = await fetch("/api/jewelry-planner", { method: "POST", body: fd });
+                const data = await res.json();
+                renderOutput(data);
+            } catch(e) { alert("Error generating recommendations!"); }
+            finally { btn.innerText = "Get Jewelry Recommendations"; btn.disabled = false; }
+        }
+        function renderOutput(data) {
+            let html = "";
+            (data.jewelry_recommendations || []).forEach(item => {
+                html += `<div class="item-box"><h3 style="color:#5b21b6;">${item.item_type || 'Jewelry Piece'} - ₹${item.estimated_price}</h3>`;
+                html += `<p style="font-size:14px; color:#475569; margin-top:5px;">${item.description}</p>`;
+                if(item.shopping_links) {
+                    for(let [store, link] of Object.entries(item.shopping_links)) {
+                        html += `<a href="${link}" target="_blank" class="shop-btn ${store.toLowerCase()}">${store}</a>`;
+                    }
+                }
+                html += `</div>`;
+            });
+            document.getElementById("out").innerHTML = html;
+            document.getElementById("result").style.display = "block";
+        }
+        function logout() { localStorage.removeItem("user"); window.location.href = "/login"; }
+    </script>
+</body>
+</html>

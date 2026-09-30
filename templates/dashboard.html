@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard - PocketSmart AI</title><link rel="stylesheet" href="/static/styles.css"></head>
+<body>
+    <div class="navbar">
+        <h1>PocketSmart AI</h1>
+        <div><a href="/dashboard">Dashboard</a><a href="/history">History</a><a href="#" onclick="logout()">Logout</a></div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>Welcome, <span id="uName" style="color: #2563eb;"></span>!</h2>
+            <p style="color: #64748b;">Select an AI Planner module to get personalized recommendations:</p>
+            <div class="grid-3">
+                <div class="planner-card">
+                    <h3>Home Interior</h3>
+                    <p>Smart allocations for lighting, ceiling fans, and furniture.</p>
+                    <a href="/home-planner" class="btn">Open Planner &rarr;</a>
+                </div>
+                <div class="planner-card">
+                    <h3>Party Planning</h3>
+                    <p>Budget recommendations for catering, decor, and venues.</p>
+                    <a href="/party-planner" class="btn btn-secondary">Open Planner &rarr;</a>
+                </div>
+                <div class="planner-card">
+                    <h3>Jewelry Selection</h3>
+                    <p>Multimodal outfit analysis & jewelry matching.</p>
+                    <a href="/jewelry-planner" class="btn btn-purple">Open Planner &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const user = localStorage.getItem("user");
+        if(!user) window.location.href = "/login";
+        document.getElementById("uName").innerText = user;
+        function logout() { localStorage.removeItem("user"); window.location.href = "/login"; }
+    </script>
+</body>
+</html>
